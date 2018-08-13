@@ -22,7 +22,7 @@ module.exports = function(app) {
       create: [
         hook => {
           // hook.result.accessToken is already set
-          hook.result.user = hook.params.user
+          hook.result.email = hook.params.user.email
         }
       ]
     }
