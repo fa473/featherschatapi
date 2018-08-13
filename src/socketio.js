@@ -20,6 +20,26 @@ module.exports = app => {
           //   'new channel created! Name: ' + name + ' Description: ' + desc
           // )
         })
+        socket.on(
+          'newMessage',
+          async (
+            message,
+            userId,
+            channelId,
+            userName,
+            userAvatar,
+            avatarColor
+          ) => {
+            await app.service('message').create({
+              messageBody: message,
+              userId: userId,
+              channelId: channelId,
+              userName: userName,
+              userAvatar: userAvatar,
+              userAvatarColor: avatarColor
+            })
+          }
+        )
       })
     })
   )
