@@ -30,7 +30,7 @@ module.exports = app => {
             userAvatar,
             avatarColor
           ) => {
-            await app.service('message').create({
+            const msg = await app.service('message').create({
               messageBody: message,
               userId: userId,
               channelId: channelId,
@@ -38,6 +38,17 @@ module.exports = app => {
               userAvatar: userAvatar,
               userAvatarColor: avatarColor
             })
+            socket.emit(
+              'messageCreated',
+              msg.messageBody,
+              msg.userId,
+              msg.channelId,
+              msg.userName,
+              msg.userAvatar,
+              msg.userAvatarColor,
+              msg._id,
+              msg.timeStamp
+            )
           }
         )
       })
