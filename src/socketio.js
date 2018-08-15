@@ -1,25 +1,41 @@
 const socketio = require('@feathersjs/socketio')
 
 module.exports = app => {
+  const typingUsers = {}
   app.configure(
     socketio(io => {
       io.on('connection', socket => {
-        // console.log('Connected to socketio')
+        console.log('a user connected')
+        // Listen for new channel
         socket.on('newChannel', async (name, desc) => {
           const channel = await app.service('channel').create({
             name: name,
             description: desc
           })
-          socket.emit(
+          io.emit(
             'channelCreated',
             channel.name,
             channel.description,
             channel._id
           )
-          // console.log(
-          //   'new channel created! Name: ' + name + ' Description: ' + desc
-          // )
+          console.log('channel created')
         })
+
+        // Listen for start typing
+        socket.on('startType', (userName, channelId) => {
+          typingUsers[userName] = channelId
+          console.log(userName + ' is typing in ' + channelId)
+          io.emit('userTypingUpdate', typingUsers, channelId)
+        })
+
+        // Listen for stop typing
+        socket.on('stopType', (userName, channelId) => {
+          delete typingUsers[userName]
+          console.log(userName + ' stopped typing in ' + channelId)
+          io.emit('userTypingUpdate', typingUsers)
+        })
+
+        // Listen for new message
         socket.on(
           'newMessage',
           async (
@@ -38,7 +54,8 @@ module.exports = app => {
               userAvatar: userAvatar,
               userAvatarColor: avatarColor
             })
-            socket.emit(
+            console.log(`${userName} sent a message`)
+            io.emit(
               'messageCreated',
               msg.messageBody,
               msg.userId,
